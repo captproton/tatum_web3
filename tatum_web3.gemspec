@@ -1,21 +1,18 @@
 # frozen_string_literal: true
 
-require_relative "lib/touringplans/version"
+require_relative "lib/tatum_web3/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "touringplans"
-  spec.version       = Touringplans::VERSION
+  spec.name          = "tatum_web3"
+  spec.version       = TatumWeb3::VERSION
   spec.authors       = ["captproton"]
   spec.email         = ["carl@wdwhub.net"]
 
-  spec.summary       = "TouringPlans.com is a great fan website to plan a trip to Walt Disney World in Florida.  This ruby gem makes its API easier to work with."
-  spec.homepage      = "https://github.com/wdwhub/touringplans"
-  spec.license       = "MIT"
-  spec.required_ruby_version = ">= 2.6.0"
-
-  spec.metadata["homepage_uri"]       = "https://github.com/wdwhub/touringplans"
-  spec.metadata["source_code_uri"]    = "https://github.com/wdwhub/touringplans"
-  spec.metadata["changelog_uri"]      = "https://github.com/wdwhub/touringplans/blob/main/Changelog.md"
+  spec.summary       = "tatum_web3 allows you to interact with web3 through the tatum.io web api."
+  spec.description   = "With tatum_web3, you can perform actions like create NFT's and wallets on several blockchains"
+    spec.metadata["homepage_uri"]       = "https://github.com/captproton/tatum_web3"
+  spec.metadata["source_code_uri"]    = "https://github.com/captproton/tatum_web3"
+  spec.metadata["changelog_uri"]      = "https://github.com/captproton/tatum_web3/blob/main/CHANGELOG.md"
 
   spec.add_development_dependency "awesome_print", "~> 1.9", ">= 1.9.2"
   spec.add_development_dependency "pry", "~> 0.14.1"
@@ -25,6 +22,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "httparty", "~> 0.19.0"
   spec.add_runtime_dependency 'dry-struct', '~> 1.4'
+
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
