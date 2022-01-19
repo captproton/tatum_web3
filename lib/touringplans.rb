@@ -33,8 +33,8 @@ module Touringplans
 
     include HTTParty
     # currently Touring Plans has no verision in its API
-    DEFAULT_API_VERSION = "1"
-    DEFAULT_BASE_URI  = "https://touringplans.com/"
+    DEFAULT_API_VERSION = "3"
+    DEFAULT_BASE_URI  = "https://api-us-west1.tatum.io"
     # do not freeze DEFAULT_QUERY
     DEFAULT_QUERY     = {}
 
