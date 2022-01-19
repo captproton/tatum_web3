@@ -20,60 +20,7 @@ module Touringplans
     magic_kingdom_attractions: {
       method: "get",
       path: "/magic-kingdom/attractions.json"
-    },
-    animal_kingdom_dining: {
-      method: "get",
-      path: "/animal-kingdom/dining.json"
-    },
-    animal_kingdom_attractions: {
-      method: "get",
-      path: "/animal-kingdom/attractions.json"
-    },
-    epcot_dining: {
-      method: "get",
-      path: "/epcot/dining.json"
-    },
-    epcot_attractions: {
-      method: "get",
-      path: "/epcot/attractions.json"
-    },
-    hollywood_studios_dining: {
-      method: "get",
-      path: "/hollywood-studios/dining.json"
-    },
-    hollywood_studios_attractions: {
-      method: "get",
-      path: "/hollywood-studios/attractions.json"
-    },
-    walt_disney_world_hotels: {
-      method: "get",
-      path: "/walt-disney-world/hotels.json"
-    },
-    walt_disney_world_campground: {
-      method: "get",
-      path: "/walt-disney-world/hotels.json"
-    },
-    walt_disney_world_deluxe_hotels: {
-      method: "get",
-      path: "/walt-disney-world/hotels.json"
-    },
-    walt_disney_world_deluxe_villas: {
-      method: "get",
-      path: "/walt-disney-world/hotels.json"
-    },
-    walt_disney_world_moderate_hotels: {
-      method: "get",
-      path: "/walt-disney-world/hotels.json"
-    },
-    walt_disney_world_value_hotels: {
-      method: "get",
-      path: "/walt-disney-world/hotels.json"
-    },
-    walt_disney_world_disney_springs_resorts: {
-      method: "get",
-      path: "/walt-disney-world/hotels.json"
-    }
-  }.freeze
+    }}.freeze
 
   def self.routes
     ROUTES
