@@ -19,6 +19,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake", "~> 13.0"
   spec.add_development_dependency "rubocop", "~> 1.7"
   spec.add_development_dependency "rspec", "~> 3.0"
+  spec.add_development_dependency  'dotenv', '~> 2.7', '>= 2.7.6'
 
   spec.add_runtime_dependency "httparty", "~> 0.19.0"
   spec.add_runtime_dependency 'dry-struct', '~> 1.4'
