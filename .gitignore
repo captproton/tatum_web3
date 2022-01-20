@@ -10,7 +10,7 @@
 ## custom for this gem
 /Gemfile.lock
 /.tool-versions
-/touringplans-*.gem
+.env
 
 # rspec failure tracking
 .rspec_status

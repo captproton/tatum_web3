@@ -12,6 +12,7 @@ gem "rubocop", "~> 1.7", require: false
 
 # testing
 gem "rspec", "~> 3.0"
+gem 'dotenv', '~> 2.7', '>= 2.7.6'
 
 ## custom for gem
 # connect to the API
