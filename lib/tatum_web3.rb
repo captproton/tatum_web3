@@ -102,7 +102,7 @@ module TatumWeb3
     def initialize(options = {})
       @api_version = options.fetch(:api_version, DEFAULT_API_VERSION)
       @query       = options.fetch(:query, DEFAULT_QUERY)
-      @msg_headers     = options.fetch(:msg_headers, DEFAULT_HEADERS)
+      @headers     = options.fetch(:headers, DEFAULT_HEADERS)
       @connection  = self.class
     end
 
@@ -110,13 +110,13 @@ module TatumWeb3
       @query.update(params)
     end
 
-    def msg_headers(params = {})
-      @msg_headers.update(params)
+    def headers(params = {})
+      @headers.update(params)
     end
 
-    def get(relative_path, query = {}, msg_headers = {})
+    def get(relative_path, query = {}, headers = {})
       relative_path = add_api_version(relative_path)
-      connection.get relative_path, query: @query.merge(query), headers: @msg_headers.merge(msg_headers)
+      connection.get relative_path, query: @query.merge(query), headers: @headers.merge(headers)
     end
 
     private
@@ -130,6 +130,13 @@ module TatumWeb3
 
     def api_version_path
       "v" + @api_version.to_s
+    end
+
+    def add_path_variables_in_order(relative_path)
+      "#{relative_path}#{path_varibles}"
+    end
+    def path_variables(ordered_params = {})
+      
     end
   end
 
