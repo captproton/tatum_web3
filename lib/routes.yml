@@ -1,4 +1,82 @@
 ---
-magic_kingdom_dining:
-  method: get
-  path: "/magic-kingdom/dining.json"
+generate_flow_wallet:
+  method: "get"
+  path: "/flow/wallet"
+  path_variable_keys: {}
+
+deploy_flow_nft: 
+  method: "post"
+  path: "/nft/deploy/"
+  path_variable_keys: {}
+
+generate_private_key: 
+  method: "post"
+  path: "/flow/wallet/priv"
+  path_variable_keys: {}
+
+
+generate_flow_account_address_from_extended_public_key: 
+  method: "get"
+  # path: "/flow/address/:xpub/:index"
+  path: "/flow/address"
+  path_variable_keys: {xpub:"", index:""}
+
+
+mint_nft: 
+  method: "post"
+  path: "/nft/mint"
+  path_variable_keys: {}
+
+
+mint_nft_multiple_tokens: 
+  method: "post"
+  path: "/nft/mint/batch"
+  path_variable_keys: {}
+
+
+transfer_nft_token: 
+  method: "post"
+  path: "/nft/transaction"
+  path_variable_keys: {}
+
+
+burn_nft: 
+  method: "post"
+  path: "/nft/burn"
+  path_variable_keys: {}
+
+
+get_nft_tokens_by_address: 
+  method: "get"
+  # path: "/nft/balance/:chain/:contractAddress/:address"
+  path: "/nft/balance"
+  path_variable_keys: {chain: "", contractAddress: "", address: ""}
+
+
+get_token_metadata: 
+  method: "get"
+  # path: "/nft/metadata/:chain/:contractAddress/:token?account=0x2d0d7b39db4e3a08"
+  path: "/nft/metadata"
+  path_variable_keys: {chain: "", contractAddress: "", token: ""}
+
+
+
+get_contract_address: 
+  method: "get"
+  # path: "/nft/address/:chain/:txId"
+  path: "/nft/address"
+  path_variable_keys: {chain: "", txId: ""}
+
+
+get_nft_transaction: 
+  method: "get"
+  # path: "/nft/address/:chain/:txId"
+  path: "/nft/address"
+  path_variable_keys: {chain: "", txId: ""}
+
+
+get_account: 
+  method: "get"
+  # path: "/flow/account/:address"
+  path: "/flow/account"
+  path_variable_keys: {address: ""}

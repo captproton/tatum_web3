@@ -14,83 +14,22 @@ module TatumWeb3
   end
 
   ROUTES = {
-    generate_flow_wallet: {
-      method: "get",
-      path: "/flow/wallet"
-    },
-    deploy_flow_nft: {
-      method: "post",
-      path: "/nft/deploy/"
-    },
-    generate_private_key: {
-      method: "post",
-      path: "/flow/wallet/priv"
-    },
 
-    generate_flow_account_address_from_extended_public_key: {
-      method: "get",
-      path: "/flow/address/:xpub/:index",
-    },
-
-    mint_nft: {
-      method: "post",
-      path: "/nft/mint/"
-    },
-
-    mint_nft_multiple_tokens: {
-      method: "post",
-      path: "/nft/mint/batch"
-    },
-
-    transfer_nft_token: {
-      method: "post",
-      path: "/nft/transaction/"
-    },
-
-    burn_nft: {
-      method: "post",
-      path: "/nft/burn/"
-    },
-
-    get_nft_tokens_by_address: {
-      method: "get",
-      path: "/nft/balance/:chain/:contractAddress/:address"
-    },
-
-    get_token_metadata: {
-      method: "get",
-      path: "/nft/metadata/:chain/:contractAddress/:token?account=0x2d0d7b39db4e3a08"
-    },
-
-    get_contract_address: {
-      method: "get",
-      path: "/nft/address/:chain/:txId"
-    },
-
-    get_nft_transaction: {
-      method: "get",
-      path: "/nft/address/:chain/:txId"
-    },
-
-    get_account: {
-      method: "get",
-      path: "/flow/account/:address"
-    }
 
   }.freeze
 
   def self.routes
-    ROUTES
+    RoutesTable.load_routes_file(routes_relative_file_path: "/routes.yml")
   end
 
-  # deals solely with how to create access to the resource, the lock of "lock & key"
+  # deals solely with how to create access to the resource, the LOCK of "lock & key"
   class Connection
     # concerned only on where it gets the info it needs
     # and maybe a version number
 
     include HTTParty
     debug_output $stdout
-    # currently Touring Plans has no verision in its API
+    # currently Tatum has a verisioned API
     DEFAULT_API_VERSION   = "3"
     DEFAULT_BASE_URI      = "https://api-us-west1.tatum.io"
     # do not freeze DEFAULT_QUERY
@@ -114,8 +53,11 @@ module TatumWeb3
       @headers.update(params)
     end
 
-    def get(relative_path, query = {}, headers = {})
+    def get(relative_path, query = {}, headers = {}, path_vars = {})
+    #  relative_path for 
       relative_path = add_api_version(relative_path)
+      # relative_path plus tail-end vars
+      # path: "/nft/address/:chain/:txId"
       connection.get relative_path, query: @query.merge(query), headers: @headers.merge(headers)
     end
 
@@ -140,7 +82,7 @@ module TatumWeb3
     end
   end
 
-  # deals solely with how to manage the connection, the key of "lock & key"
+  # deals solely with how to manage the connection, the KEY of "lock & key"
   class Client
     def initialize(connection:, routes:)
       @connection = connection
@@ -169,5 +111,142 @@ module TatumWeb3
     end
   end
 
+  # Generates and updates routes for all types of venues in a YAML document.
+  class RoutesTable
+    require "fileutils"
+    def initialize(filename: "routes_table.yml")
+      @filename = filename
+    end
+
+    def self.original_routes
+      # this method exists so that we can create a yaml file of routes
+      tw3 = TatumWeb3.routes
+      # convert symbols back to strings
+      stringify_keys(tw3)
+      # rt_keys       = tw3.keys
+      # rt_values     = tw3.values
+      # string_keys   = []
+
+      # rt_keys.each {|k| string_keys << k.to_s}
+      # # create new hash with string keys
+      # string_keys.zip(rt_values).to_h
+    end
+
+    def self.symbolize_keys(hash)
+      hash.each_with_object({}) do |(key, value), result|
+        new_key = case key
+                  when String then key.to_sym
+                  else key
+                  end
+        new_value = case value
+                    when Hash then symbolize_keys(value)
+                    else value
+                    end
+        result[new_key] = new_value
+      end
+    end
+
+    def self.stringify_keys(hash)
+      # inspired by https://avdi.codes/recursively-symbolize-keys/
+      hash.each_with_object({}) do |(key, value), result|
+        new_key = case key
+                  when Symbol then key.to_s
+                  else key
+                  end
+        new_value = case value
+                    when Hash then stringify_keys(value)
+                    else value
+                    end
+        result[new_key] = new_value
+      end
+    end
+
+    def self.load_routes_file(routes_relative_file_path: "/routes.yml")
+      tp_path = $LOAD_PATH.grep(/tatum_web3/).last
+      routes_file = "#{tp_path}#{routes_relative_file_path}"
+      YAML.safe_load(File.read(routes_file))
+    end
+
+    def self.update_file
+      # gather info into hashes
+      attractions_routes    = _generate_interest_routes_hash("attractions")
+      dining_routes         = _generate_interest_routes_hash("dining")
+      hotels_routes         = _generate_interest_routes_hash("hotels")
+      updated_routes        = original_routes.merge(attractions_routes, dining_routes, hotels_routes)
+
+      updated_routes_yaml   = _convert_hash_to_yaml(updated_routes)
+
+      file = _initialize_file
+      _save_content_to_file(file, updated_routes_yaml)
+    end
+
+    def self._initialize_file
+      # delete old file if it exits
+      lib_dir = FileUtils.getwd + "/lib"
+      routes_file = "#{lib_dir}/routes.yml"
+
+      # ensure the file exists
+      touched_routes_file_array = FileUtils.touch(routes_file)
+      # we want the first string value
+      touched_routes_file_array.first
+    end
+
+    def self._generate_interest_routes_hash(interest)
+      interest_venues = Touringplans.list_all(interest)
+      interest_routes = {}
+
+      interest_venues.each do |iv|
+        new_route = _generate_interest_route(iv.venue_permalink, interest, iv.permalink)
+        key = new_route.keys.first
+        values = new_route[key]
+        interest_routes[key] = values
+      end
+
+      interest_routes
+    end
+
+    def self._generate_interest_route(venue_permalink, interest_permalink, place_permalink)
+      # {magic_kingdom_attractions_haunted_mansion: {
+      #   method: "get",
+      #   path: "/magic-kingdom/attractions/haunted-mansion.json"
+      #   }
+      # }
+      path    = "/#{venue_permalink}/#{interest_permalink}/#{place_permalink}"
+      key     = path.to_s.downcase.gsub("/", " ").gsub("-", " ").strip
+      key     = key.gsub(" ", "_")
+      method  = "get"
+      format  = "json"
+
+      { key => { "method".to_s => method,
+                 "path".to_s => "#{path}.#{format}" } }
+    end
+
+    def self._convert_hash_to_yaml(hash)
+      hash.to_yaml
+    end
+
+    def self._save_content_to_file(file, content)
+      new_file = File.open(file, "w")
+      new_file.write(content)
+      new_file.close
+    end
+
+    def self._read_file_to_terminal(file)
+      new_file = File.open(file, "r")
+      new_file.close
+    end
+  end
+
+  def self._assemble_route(path_variables)
+    # format route
+    collection    = collection.to_s.downcase.gsub(" ", "_").gsub("-", "_")
+    interest_type = interest_type.to_s.downcase.gsub(" ", "_").gsub("-", "_")
+    venue         = venue.to_s.downcase.gsub(" ", "_").gsub("-", "_")
+
+    route = [collection, interest_type, venue].join("_")
+    route = [collection, interest_type].join("_") if venue == "list"
+
+    route
+  end
 
 end
