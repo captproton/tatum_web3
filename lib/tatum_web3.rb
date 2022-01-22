@@ -30,13 +30,19 @@ module TatumWeb3
     # do not freeze DEFAULT_QUERY
     DEFAULT_QUERY         = {}
     DEFAULT_HEADERS       = {}
+    DEFAULT_PATH_VARS     = {}
 
     base_uri DEFAULT_BASE_URI
 
-    def initialize(options = {})
-      @api_version = options.fetch(:api_version, DEFAULT_API_VERSION)
-      @query       = options.fetch(:query, DEFAULT_QUERY)
-      @headers     = options.fetch(:headers, DEFAULT_HEADERS)
+    def initialize(api_version:DEFAULT_API_VERSION,
+        query: DEFAULT_QUERY,
+        headers:    DEFAULT_HEADERS,
+        path_vars:  DEFAULT_PATH_VARS
+      )
+      @api_version = api_version
+      @query       = query
+      @headers     = headers
+      @path_vars   = path_vars
       @connection  = self.class
     end
 
@@ -54,10 +60,16 @@ module TatumWeb3
 
     def get(relative_path, query = {}, headers = {}, path_vars = {})
     #  relative_path for 
-      relative_path = add_api_version(relative_path)
+      relative_path = _assemble_path(relative_path: relative_path, path_vars: self.path_vars)
       # relative_path plus tail-end vars
       # path: "/nft/address/:chain/:txId"
       connection.get relative_path, query: @query.merge(query), headers: @headers.merge(headers)
+    end
+
+    def _assemble_path(relative_path:, path_vars: {})
+      relative_path = add_api_version(relative_path)
+      tail = path_vars.values.join("/")
+      relative_path + "/" + tail.to_s
     end
 
     private
@@ -79,6 +91,8 @@ module TatumWeb3
     def path_variables(ordered_params = {})
       
     end
+
+
   end
 
   # deals solely with how to manage the connection, the KEY of "lock & key"
@@ -235,17 +249,4 @@ module TatumWeb3
       new_file.close
     end
   end
-
-  # def write(file:, data:, mode: "ascii")
-  # end
-  def self._assemble_route(route:, path_vars: {})
-    # format route
-    # default_path_vars = route["path_variable_keys"]
-    # return default_path_vars if route["path_variable_keys"].keys != path_vars.keys
-    # path = route["path"].to_s
-    # path
-    tail = path_vars.values.join("/")
-    route["path"] + "/" + tail.to_s
-  end
-
 end
