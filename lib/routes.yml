@@ -16,8 +16,8 @@ generate_private_key:
 
 
 generate_flow_account_address_from_extended_public_key: 
+# path: "/flow/address/:xpub/:index"
   method: "get"
-  # path: "/flow/address/:xpub/:index"
   path: "/flow/address"
   path_variable_keys: {xpub:"", index:""}
 

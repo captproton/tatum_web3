@@ -13,11 +13,6 @@ module TatumWeb3
     include Dry.Types()
   end
 
-  ROUTES = {
-
-
-  }.freeze
-
   def self.routes
     RoutesTable.load_routes_file(routes_relative_file_path: "/routes.yml")
   end
@@ -51,6 +46,10 @@ module TatumWeb3
 
     def headers(params = {})
       @headers.update(params)
+    end
+
+    def path_vars(params = {})
+      @path_vars.update(params)
     end
 
     def get(relative_path, query = {}, headers = {}, path_vars = {})
@@ -91,7 +90,7 @@ module TatumWeb3
 
     def method_missing(method, *request_arguments)
       # retrieve the route map
-      route_map = routes.fetch(method)
+      route_map = routes.fetch(method.to_s)
 
       # make request via the connection
       response_from_route(route_map, request_arguments)
@@ -103,8 +102,8 @@ module TatumWeb3
 
     def response_from_route(route_map, request_arguments)
       # gather the routes required parameters
-      http_method   = route_map.fetch(:method)
-      relative_path = route_map.fetch(:path)
+      http_method   = route_map.fetch(:method.to_s)
+      relative_path = route_map.fetch(:path.to_s)
 
       # call the connection for records
       connection.send(http_method, relative_path, *request_arguments)
@@ -237,16 +236,16 @@ module TatumWeb3
     end
   end
 
-  def self._assemble_route(path_variables)
+  # def write(file:, data:, mode: "ascii")
+  # end
+  def self._assemble_route(route:, path_vars: {})
     # format route
-    collection    = collection.to_s.downcase.gsub(" ", "_").gsub("-", "_")
-    interest_type = interest_type.to_s.downcase.gsub(" ", "_").gsub("-", "_")
-    venue         = venue.to_s.downcase.gsub(" ", "_").gsub("-", "_")
-
-    route = [collection, interest_type, venue].join("_")
-    route = [collection, interest_type].join("_") if venue == "list"
-
-    route
+    # default_path_vars = route["path_variable_keys"]
+    # return default_path_vars if route["path_variable_keys"].keys != path_vars.keys
+    # path = route["path"].to_s
+    # path
+    tail = path_vars.values.join("/")
+    route["path"] + "/" + tail.to_s
   end
 
 end
