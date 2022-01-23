@@ -31,18 +31,21 @@ module TatumWeb3
     DEFAULT_QUERY         = {}
     DEFAULT_HEADERS       = {}
     DEFAULT_PATH_VARS     = {}
+    DEFAULT_BODY          = {}
 
     base_uri DEFAULT_BASE_URI
 
     def initialize(api_version:DEFAULT_API_VERSION,
-        query: DEFAULT_QUERY,
+        query:      DEFAULT_QUERY,
         headers:    DEFAULT_HEADERS,
-        path_vars:  DEFAULT_PATH_VARS
+        path_vars:  DEFAULT_PATH_VARS,
+        body:       DEFAULT_BODY
       )
-      @api_version = api_version
-      @query       = query
-      @headers     = headers
-      @path_vars   = path_vars
+      @api_version  = api_version
+      @query        = query
+      @headers      = headers
+      @path_vars    = path_vars
+      @body         = body
       @connection  = self.class
     end
 
@@ -58,12 +61,26 @@ module TatumWeb3
       @path_vars.update(params)
     end
 
+    def body(params = {})
+      @body.update(params)
+    end
+    
     def get(relative_path, query = {}, headers = {}, path_vars = {})
     #  relative_path for 
       relative_path = _assemble_path(relative_path: relative_path, path_vars: self.path_vars)
       # relative_path plus tail-end vars
       # path: "/nft/address/:chain/:txId"
       connection.get relative_path, query: @query.merge(query), headers: @headers.merge(headers)
+    end
+
+    def post(relative_path, query = {}, headers = {}, body = {})
+    #  relative_path for 
+      # relative_path = _assemble_path(relative_path: relative_path)
+      relative_path = _assemble_path(relative_path: relative_path, path_vars: self.path_vars)
+      # relative_path plus tail-end vars
+      # path: "/nft/address/:chain/:txId"
+      # connection.post relative_path, query: @query.merge(query), headers: @headers.merge(self.headers), body: @body.merge(self.body).to_json
+      connection.post relative_path, query: @query.merge(query), headers: @headers.merge(self.headers), body: @body.merge(self.body).to_json
     end
 
     def _assemble_path(relative_path:, path_vars: {})
@@ -118,6 +135,10 @@ module TatumWeb3
       # gather the routes required parameters
       http_method   = route_map.fetch(:method.to_s)
       relative_path = route_map.fetch(:path.to_s)
+      puts "==============="
+      puts "http_method is #{http_method}"
+      puts "relative_path is #{relative_path}"
+      puts "==============="
 
       # call the connection for records
       connection.send(http_method, relative_path, *request_arguments)
