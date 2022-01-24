@@ -1,13 +1,8 @@
 ---
+# see https://blog.tatum.io/how-to-build-apps-quickly-on-flow-using-tatum-95d3d93b5eab
 generate_flow_wallet:
   method: "get"
   path: "/flow/wallet"
-  path_variable_keys: {}
-  body: {}
-
-deploy_flow_nft: 
-  method: "post"
-  path: "/nft/deploy/"
   path_variable_keys: {}
   body: {}
 
@@ -32,41 +27,6 @@ mint_nft:
   body: {}
 
 
-mint_nft_multiple_tokens: 
-  method: "post"
-  path: "/nft/mint/batch"
-  path_variable_keys: {}
-  body: {}
-
-
-transfer_nft_token: 
-  method: "post"
-  path: "/nft/transaction"
-  path_variable_keys: {}
-  body: {}
-
-
-burn_nft: 
-  method: "post"
-  path: "/nft/burn"
-  path_variable_keys: {}
-  body: {}
-
-
-get_nft_tokens_by_address: 
-  method: "get"
-  # path: "/nft/balance/:chain/:contractAddress/:address"
-  path: "/nft/balance"
-  path_variable_keys: {}
-  body: {}
-
-
-get_token_metadata: 
-  method: "get"
-  # path: "/nft/metadata/:chain/:contractAddress/:token?account=0x2d0d7b39db4e3a08"
-  path: "/nft/metadata"
-  path_variable_keys: {chain: "", contractAddress: "", token: ""}
-  body: {}
 
 
 
@@ -93,10 +53,153 @@ get_account:
   path_variable_keys: {address: ""}
   body: {}
 
-# BlockchainInteraction
+## Perform transactions and get blockchain data
+
+# send FLOW or FUSD 
+send_flow_or_fusd:
+  method: "post"
+  # path: "/flow/transaction"
+  path: "/flow/transaction"
+  path_variable_keys: {}
+  body: {"to": "", "amount": "","privateKey": "", "account": ""}
+
+# custom transactions
+do_custom_transaction:
+  method: "post"
+  # path: "/flow/transaction/custom"
+  path: "/flow/transaction/custom"
+  path_variable_keys: {}
+  body: {"transaction": "", "args":[], "privateKey": "", "account": ""}
+
+# get the current block number
 get_current_block_number:
   method: "get"
   # path: "/flow/block/current"
   path: "/flow/block/current"
   path_variable_keys: {}
+  body: {}
+
+# get any block by its hash or height 
+get_block:
+  method: "get"
+  # path: "/flow/block/19791413"
+  path: "/flow/block"
+  path_variable_keys: {block_id: ""}
+  body: {}
+
+# If you want to look up specific events, 
+# like outgoing or incoming transactions or different types of transactions, 
+# you can use this API call to get events from blocks:
+get_event_from_block:
+  method: "get"
+  # path: "/flow/block/events?from=19791413&to=19791423&type=A.1654653399040a61.FlowToken.TokensWithdrawn'"
+  path: "/flow/block/events"
+  path_variable_keys: {}
+  body: {}
+
+#  get the details of a transaction by its hash
+get_transaction_details:
+  method: "get"
+  # path: "/flow/transaction/3f1305c3dd428d8574b46054d016c77236e8bcd3d1823ef474af9fd0b437bbe0' \"
+  path: "/flow/transaction"
+  path_variable_keys: {transaction_hash: ""}
+  body: {}
+
+  ## Create, mint, and work with NFTs
+
+# Once you’ve generated an address and private key, 
+# enter them in the following API call to deploy your space within our NFT smart contract:
+deploy_nft: 
+  method: "post"
+  # path: "/nft/deploy"
+  path: "/nft/deploy/"
+  path_variable_keys: {}
+  body: {"chain": "", "privateKey": "", "account": ""}
+
+# Now that you’ve deployed your space within the smart contract, 
+# you’ll need to get the address of your space to mint, transfer, burn, or look up data later.
+# This API call will get the contract address of your space from the transaction ID
+get_contract_address_space_of_deployed_nft:
+  method: "get"
+  # path: "/nft/address/FLOW/8c2c65e0e1c309bcab13b66e715646b22c480dec9a78e09920cead39f5e571eb' \"
+  path: "/nft/address"
+  path_variable_keys: {"chain": "", "contract_space_id": ""}
+  body: {}
+
+# upload metadata to ipfs
+#  ** this needs more work **
+#  ** httparty for multipart upload **
+#  ** https://github.com/jnunemaker/httparty/blob/master/examples/multipart.rb **
+#
+# curl --request POST \
+#   --url https://api-eu1.tatum.io/v3/ipfs \
+#   --header 'content-type: multipart/form-data' \
+#   --header 'x-api-key: REPLACE_KEY_VALUE'
+#   -F 'file=@\"C:/myfile.txt\"'
+
+upload_metadata: 
+  method: "post"
+  # path: "/nft/deploy"
+  path: "/ipfs"
+  path_variable_keys: {}
+  body: {"chain": "", "privateKey": "", "account": ""}
+
+# mint nft
+# The recipient address in the “to” field
+#    The URL of the json metadata scheme we uploaded in the previous section
+#    The contract address of the space we deployed within the smart contract
+#    The name of the blockchain we’re working with (in our case “FLOW”)
+#    The private key of the account you’re minting from
+#    The account address of the account you’re minting from
+mint_nft: 
+  method: "post"
+  path: "/nft/mint"
+  path_variable_keys: {}
+  body: {"to": "","url": "", "contractAddress": "", "chain": "", "privateKey": "", "account": ""}
+
+# mint multipe nft tokens
+# 
+mint_multiple_nft_tokens: 
+  method: "post"
+  path: "/nft/mint/batch"
+  path_variable_keys: {}
+  body: {"to": [],"url": [], "contractAddress": "", "chain": "", "privateKey": "", "account": ""}
+
+# Once you’ve minted NFTs, you’ll want to transfer them between accounts. 
+transfer_nft_token: 
+  method: "post"
+  path: "/nft/transaction"
+  path_variable_keys: {}
+  body: {"tokenId": "", "to": "", "contractAddress": "", "chain": "", "privateKey": "", "account": ""}
+
+# If you’d like to burn an NFT for any reason, perhaps to burn it on one blockchain and re-mint it on another, 
+# effectively “transferring” the NFT
+burn_nft: 
+  method: "post"
+  path: "/nft/burn"
+  path_variable_keys: {}
+  body: {"tokenId": "", "contractAddress": "", "chain": "", "privateKey": "", "account": ""}
+
+# You can quickly get which tokens an address holds
+get_nft_tokens_by_address: 
+  method: "get"
+  # path: "/nft/balance/:chain/:contractAddress/:address"
+  path: "/nft/balance"
+  path_variable_keys: {"chain":"","contractAddress":"". "address":""}
+  body: {}
+
+# You can get NFT metadata
+get_token_metadata: 
+  method: "get"
+  # path: "/nft/metadata/:chain/:contractAddress/:token?account=0x2d0d7b39db4e3a08"
+  path: "/nft/metadata"
+  path_variable_keys: {chain: "", contractAddress: "", token: ""}
+  body: {}
+
+# get an NFT transaction by its hash
+get_nft_transaction: 
+  method: "get"
+  # path: "/nft/address/:chain/:txId"
+  path: "/nft/address"
+  path_variable_keys: {chain: "", txId: ""}
   body: {}
