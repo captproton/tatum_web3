@@ -93,3 +93,10 @@ get_account:
   path_variable_keys: {address: ""}
   body: {}
 
+# BlockchainInteraction
+get_current_block_number:
+  method: "get"
+  # path: "/flow/block/current"
+  path: "/flow/block/current"
+  path_variable_keys: {}
+  body: {}

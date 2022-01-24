@@ -66,12 +66,20 @@ RSpec.describe TatumWeb3 do
     
 
     describe "account calls" do
-      # wallet_connection = TatumWeb3::Connection.new(headers:{"x-api-key"=> ENV['TATUM_API_KEY']}, path_vars: {})
-      # client   = TatumWeb3::Client.new(connection: wallet_connection, routes: TatumWeb3.routes)
-      # wallet = client.generate_flow_wallet
+      wallet_connection = TatumWeb3::Connection.new(headers:{"x-api-key"=> ENV['TATUM_API_KEY']}, 
+                          path_vars: {}
+                        )
+      wallet_client     = TatumWeb3::Client.new(connection: wallet_connection, routes: TatumWeb3.routes)
+      wallet            = wallet_client.generate_flow_wallet
+
+      onchain_address_connection  = TatumWeb3::Connection.new(headers:{"x-api-key"=> ENV['TATUM_API_KEY']}, 
+                                    path_vars: {xpub: wallet.fetch("xpub"), index:"1"}
+                                    )
+      onchain_address_client      = TatumWeb3::Client.new(connection: onchain_address_connection, routes: TatumWeb3.routes)
+      onchain_address_response    = onchain_address_client.generate_flow_account_address_from_extended_public_key
+      onchain_address             = onchain_address_response.parsed_response
 
       describe "can generate a wallet" do
-        # wallet = client.generate_flow_wallet
         connection = TatumWeb3::Connection.new(headers:{"x-api-key"=> ENV['TATUM_API_KEY']}, path_vars: {})
         client   = TatumWeb3::Client.new(connection: connection, routes: TatumWeb3.routes)
         response = client.generate_flow_wallet
@@ -93,11 +101,6 @@ RSpec.describe TatumWeb3 do
       end
       
       describe "can create a new address on chain" do
-        wallet_connection = TatumWeb3::Connection.new(headers:{"x-api-key"=> ENV['TATUM_API_KEY']}, 
-                            path_vars: {}
-                          )
-        wallet_client   = TatumWeb3::Client.new(connection: wallet_connection, routes: TatumWeb3.routes)
-        wallet = wallet_client.generate_flow_wallet
 
         connection  = TatumWeb3::Connection.new(headers:{"x-api-key"=> ENV['TATUM_API_KEY']}, 
                       path_vars: {xpub: wallet.fetch("xpub"), index:"1"}
@@ -126,12 +129,6 @@ RSpec.describe TatumWeb3 do
       end
 
       describe "can generate a private key" do
-        wallet_connection = TatumWeb3::Connection.new(headers:{"x-api-key"=> ENV['TATUM_API_KEY']}, 
-                            path_vars: {}
-                          )
-        wallet_client   = TatumWeb3::Client.new(connection: wallet_connection, routes: TatumWeb3.routes)
-        wallet = wallet_client.generate_flow_wallet
-#       @result     = HTTParty.post("http://127.0.0.1:8082/api/publish", :headers => {'Content-Type'=>'application/json'}, :body => params_hash.to_json,)
         connection  = TatumWeb3::Connection.new(
                       headers:  {'Content-Type'=>'application/json', "x-api-key"=> ENV['TATUM_API_KEY']}, 
                       body:     {index:0, "mnemonic":wallet.fetch("mnemonic")},
@@ -168,31 +165,83 @@ RSpec.describe TatumWeb3 do
         
         
       end
-      
-      
-    
 
+      describe "can lookup an account" do
+        connection  = TatumWeb3::Connection.new(
+                      headers:  {'Content-Type'=>'application/json', "x-api-key"=> ENV['TATUM_API_KEY']}, 
+                      path_vars: {"address" => onchain_address.fetch("address")}
+                    )
+        client      = TatumWeb3::Client.new(connection: connection, routes: TatumWeb3.routes)
+        response    = client.get_account
+        subject     = response.parsed_response
+        
+        # it "is something" do
+        #   expect(subject).to  be "something"
+        # end
 
+        it "has keys of ['address', 'balance', 'code', 'contracts', 'keys']" do
+          expect(subject.keys).to  include('address', 'balance', 'code', 'contracts', 'keys')
+        end
+
+        it "has an onchain address" do
+          expect(subject.fetch("address")).to match(/^0x/)
+        end
+        
+        it "has balance" do
+          expect(subject.fetch("balance").class).to be Integer
+        end
+        
+        it "has a code" do
+          expect(subject.fetch("code").class).to be String
+        end
+        
+        it "has contracts" do
+          expect(subject.fetch("contracts").class).to be Hash
+        end
+        
+        it "has an array of keys" do
+          expect(subject.fetch("keys").class).to be Array
+        end
+
+        it 'has keys ["hashAlgo", "index", "publicKey", "revoked", "sequenceNumber", "signAlgo", "weight"]' do
+          expect(subject.fetch("keys").first.keys).to include("hashAlgo", "index", "publicKey", "revoked", "sequenceNumber", "signAlgo", "weight") 
+        end        
+      end
     end
 
     describe "supports interacting with the blockchain" do
-      it "supports getting the current block number" do
+      describe "getting the current block number" do
+        connection  = TatumWeb3::Connection.new(
+                      headers:  {"x-api-key"=> ENV['TATUM_API_KEY']}, 
+                      body:     {},
+                      query:    {}
+                    )
+        client      = TatumWeb3::Client.new(connection: connection, routes: TatumWeb3.routes)
+        response    = client.get_current_block_number
+        subject     = response.parsed_response
+
+        # it "is something" do
+        #   expect(subject).to be "something" 
+        # end
+
+        it "is a number within a string" do
+         expect(subject).to match(/\A\d*\Z/)
+        end
+      end
+
+      describe "supports getting block by hash" do
         
       end
 
-      it "supports getting block by hash" do
+      describe "supports sending  Flow/FUSD from one account to another" do
         
       end
 
-      it "supports sending  Flow/FUSD from one account to another" do
-        
-      end
-
-      it "supports getting a transaction" do
+      describe "supports getting a transaction" do
         
       end
       
-      it "supports sending a custom transaction" do
+      describe "supports sending a custom transaction" do
         
       end
         

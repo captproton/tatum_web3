@@ -79,7 +79,6 @@ module TatumWeb3
       relative_path = _assemble_path(relative_path: relative_path, path_vars: self.path_vars)
       # relative_path plus tail-end vars
       # path: "/nft/address/:chain/:txId"
-      # connection.post relative_path, query: @query.merge(query), headers: @headers.merge(self.headers), body: @body.merge(self.body).to_json
       connection.post relative_path, query: @query.merge(query), headers: @headers.merge(self.headers), body: @body.merge(self.body).to_json
     end
 
